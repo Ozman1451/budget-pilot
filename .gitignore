@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+.next/
+frontend/out/
+frontend/tsconfig.tsbuildinfo
+# big generated data (10K/100K are small and kept for the demo)
+data/ads_1m.*
+data/ads_10m.*
+data/*.tmp
+bench/tmp/
+.DS_Store

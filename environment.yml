@@ -1,0 +1,28 @@
+name: budget-pilot
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - openjdk=17
+  - nodejs=22
+  - make
+  - pip
+  - numpy
+  - pandas
+  - pyarrow
+  - scipy
+  - pyspark
+  - plotly
+  - faker
+  - psutil
+  - fastapi
+  - uvicorn
+  - pydantic>=2
+  - pydantic-settings
+  - tenacity
+  - httpx
+  - pytest
+  - pip:
+      - mrjob
+      - google-genai
+      - playwright
