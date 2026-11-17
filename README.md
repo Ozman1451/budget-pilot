@@ -82,23 +82,23 @@ Result: predicted ROAS goes from **2.85× to 3.18×**, i.e. **+11.4% revenue fro
 ```mermaid
 flowchart LR
   subgraph Data
-    G[data/generate.py<br/>vectorised NumPy, chunked] -->|Parquet + CSV| P[(data/ads_*.parquet)]
+    G["data/generate.py<br/>vectorised NumPy, chunked"] -->|Parquet + CSV| P[("data/ads_*.parquet")]
   end
   subgraph Engine["engine/ (pure Python)"]
-    K[kpis.py<br/>CTR · CPC · CPA · CVR · ROAS · profit]
-    O[optimizer.py<br/>curve_fit a·log(1+s/b)<br/>water-filling + bootstrap]
+    K["kpis.py<br/>CTR · CPC · CPA · CVR · ROAS · profit"]
+    O["optimizer.py<br/>curve_fit a·log(1+s/b)<br/>water-filling + bootstrap"]
   end
   subgraph Bench["bench/"]
-    B1[pandas_job.py] & B2[mr_job.py · mrjob local] & B3[spark_job.py · local*]
-    R[run_all.py<br/>3 runs · median · peak RSS · agree?] --> CSV[(results.csv)] --> TR[to_readme.py]
+    B1["pandas_job.py"] & B2["mr_job.py · mrjob local"] & B3["spark_job.py · local[*]"]
+    R["run_all.py<br/>3 runs · median · peak RSS · agree?"] --> CSV[("results.csv")] --> TR["to_readme.py"]
   end
   subgraph Backend["backend/ FastAPI"]
-    T[tools.py<br/>get_kpis · optimize_budget<br/>compare_scenarios · get_benchmark]
-    A[agent.py<br/>function-calling loop] --> L[llm.py<br/>Gemini client · retry · rate gate]
+    T["tools.py<br/>get_kpis · optimize_budget<br/>compare_scenarios · get_benchmark"]
+    A["agent.py<br/>function-calling loop"] --> L["llm.py<br/>Gemini client · retry · rate gate"]
     A --> T
   end
   subgraph Frontend["frontend/ Next.js + ECharts"]
-    C[Chat] & D[Dashboard] & OP[Optimizer] & LAB[Big Data Lab]
+    C["Chat"] & D["Dashboard"] & OP["Optimizer"] & LAB["Big Data Lab"]
   end
   P --> T
   K --> T
@@ -108,7 +108,7 @@ flowchart LR
   B1 & B2 & B3 --> R
   C -- SSE /api/chat --> A
   D & OP & LAB -- /api/tool/* --> T
-  L <--> GEM[(Gemini API)]
+  L <--> GEM[("Gemini API")]
 ```
 
 **Golden rule (carried over from Need Map Chat): the LLM never computes numbers.** Gemini only routes the question to a tool and explains what the tool returned. The tools return `{summary, charts}`; the summary goes back to Gemini and the charts are drawn under the answer.
