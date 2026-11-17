@@ -1,0 +1,1 @@
+Where should the next Rs 1,000,000 of ad spend go? Budget Pilot fits a diminishing-returns curve for Facebook, Instagram, Google, TikTok and YouTube, then moves money until every platform's next rupee earns the same: +11.4% revenue from the same budget. Ask it in chat; every number comes from Python, benchmarked in Pandas, MapReduce and Spark up to 10M rows.

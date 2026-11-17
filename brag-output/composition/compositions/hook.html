@@ -1,0 +1,67 @@
+<template>
+  <style>
+    @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Geist Mono"; src: url("assets/fonts/geist-mono-latin.woff2") format("woff2"); font-weight: 100 900; }
+    #root { position: absolute; inset: 0; font-family: "Geist", sans-serif; color: #ededf2; }
+    .hk-grad { background: linear-gradient(90deg, #e94ba8, #f5a524); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #hk-label {
+      position: absolute; left: 0; right: 0; top: 268px; text-align: center;
+      font-family: "Geist Mono", monospace; font-size: 28px; letter-spacing: 0.22em; color: #8a8a9a; text-transform: uppercase;
+    }
+    #hk-amount {
+      position: absolute; left: 0; right: 0; top: 318px; text-align: center; white-space: nowrap;
+      font-family: "Geist Mono", monospace; font-weight: 600; letter-spacing: -0.05em; line-height: 1;
+    }
+    #hk-rs { font-size: 110px; color: #a9a9b8; margin-right: 26px; }
+    #hk-num { font-size: 190px; display: inline-block; }
+    #hk-pills { position: absolute; left: 0; right: 0; top: 590px; display: flex; justify-content: center; gap: 22px; }
+    .hk-pill {
+      display: flex; align-items: center; gap: 14px; padding: 14px 28px 14px 20px; border-radius: 999px;
+      background: #12121a; border: 1.5px solid #2c2c3a; box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
+      font-size: 32px; font-weight: 550; letter-spacing: -0.01em;
+    }
+    .hk-pill i { width: 16px; height: 16px; border-radius: 50%; flex: none; }
+    #hk-q { position: absolute; left: 0; right: 0; top: 752px; text-align: center; font-size: 84px; font-weight: 650; letter-spacing: -0.035em; }
+    #hk-q span { display: inline-block; }
+  </style>
+  <div id="root" data-composition-id="hook" data-width="1920" data-height="1080">
+    <div id="hk-label">Next month's ad budget</div>
+    <div id="hk-amount"><span id="hk-rs">Rs</span><span id="hk-num" class="hk-grad">1,000,000</span></div>
+    <div id="hk-pills">
+      <div class="hk-pill"><i style="background:#60A5FA"></i>Facebook</div>
+      <div class="hk-pill"><i style="background:#E94BA8"></i>Instagram</div>
+      <div class="hk-pill"><i style="background:#F5A524"></i>Google</div>
+      <div class="hk-pill"><i style="background:#2DD4BF"></i>TikTok</div>
+      <div class="hk-pill"><i style="background:#FF7A59"></i>YouTube</div>
+    </div>
+    <h1 id="hk-q"><span>Where</span> <span>should</span> <span>it</span> <span class="hk-grad">go?</span></h1>
+  </div>
+  <script>
+    (function () {
+      const num = document.getElementById("hk-num");
+      const fmt = (n) => n.toLocaleString("en-US");
+      const ease = gsap.parseEase("power3.out");
+      const clock = { t: 0 };
+      const draw = (t) => {
+        const k = ease(Math.max(0, Math.min(1, (t - 0.15) / 0.92)));
+        num.textContent = fmt(Math.round((1000000 * k) / 1000) * 1000);
+      };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(clock, { t: 0 }, { t: 5.28, duration: 5.28, ease: "none", onUpdate: () => draw(clock.t) }, 0);
+            tl.fromTo("#hk-amount", { scale: 0.97 }, { scale: 1, duration: 0.9, ease: "power3.out" }, 0.1);
+      // beat 1.07: the amount settles with a tiny push
+      tl.fromTo("#hk-num", { scale: 1 }, { scale: 1.03, duration: 0.12, ease: "power2.out", yoyo: true, repeat: 1 }, 1.05);
+      // pills on half-beats 1.59 → 2.65 (chip-lay SFX)
+      [1.59, 1.86, 2.12, 2.39, 2.65].forEach((t, i) => {
+        tl.fromTo(".hk-pill:nth-child(" + (i + 1) + ")", { opacity: 0, y: 30, scale: 0.9, filter: "blur(6px)" },
+          { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.45, ease: "expo.out" }, t - 0.03);
+      });
+      // question on beat 3.18, holds ~1.8 s
+      tl.fromTo("#hk-q span", { opacity: 0, y: 14, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.2, ease: "power4.out", stagger: 0.075 }, 3.16);
+      tl.to(["#hk-label", "#hk-amount", ".hk-pill", "#hk-q"], { opacity: 0, filter: "blur(10px)", duration: 0.22, ease: "power3.in", stagger: 0.012 }, 4.92);
+      draw(0);
+      window.__timelines["hook"] = tl;
+    })();
+  </script>
+</template>

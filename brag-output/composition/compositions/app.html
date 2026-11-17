@@ -1,0 +1,34 @@
+<template>
+  <style>
+    @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; }
+    #root { position: absolute; inset: 0; font-family: "Geist", sans-serif; color: #ededf2; }
+    #ap-chip {
+      position: absolute; left: 192px; top: 58px; display: flex; align-items: center; gap: 14px;
+      font-size: 32px; font-weight: 600; letter-spacing: -0.015em;
+    }
+    #ap-chip b { width: 14px; height: 14px; border-radius: 50%; background: linear-gradient(135deg, #e94ba8, #f5a524); box-shadow: 0 0 14px #e94ba8; }
+    #ap-chip em { font-style: normal; color: #a9a9b8; font-weight: 450; }
+    #ap-frame {
+      position: absolute; left: 192px; top: 132px; width: 1536px; height: 864px;
+      border-radius: 20px; overflow: hidden; border: 1.5px solid #2c2c3a;
+      box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6), 0 0 80px rgba(233, 75, 168, 0.12);
+    }
+    #ap-video { position: absolute; left: 0; top: 0; width: 1536px; height: 864px; object-fit: cover; }
+  </style>
+  <div id="root" data-composition-id="app" data-width="1920" data-height="1080">
+    <div id="ap-chip"><b></b>The real app <em>· ask in plain words, every number from Python</em></div>
+    <div id="ap-frame">
+      <!-- Real recording (work/record.mjs, MOCK_CHAT=1): chip clicked → optimize_budget → donut + bars -->
+      <video id="ap-video" class="clip" data-start="0" data-duration="5.27" data-media-start="0" data-track-index="2" muted playsinline src="assets/clips/app.mp4"></video>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#ap-frame", { opacity: 0, scale: 1.05, filter: "blur(10px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.55, ease: "expo.out" }, 0);
+      tl.fromTo("#ap-chip", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.22);
+      tl.to(["#ap-frame", "#ap-chip"], { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power3.in" }, 5.04);
+      window.__timelines["app"] = tl;
+    })();
+  </script>
+</template>

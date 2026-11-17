@@ -1,0 +1,42 @@
+<template>
+  <style>
+    @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Geist Mono"; src: url("assets/fonts/geist-mono-latin.woff2") format("woff2"); font-weight: 100 900; }
+    #root { position: absolute; inset: 0; font-family: "Geist", sans-serif; color: #ededf2; }
+    .ot-grad { background: linear-gradient(90deg, #e94ba8, #f5a524); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #ot-line { position: absolute; left: 0; right: 0; top: 420px; text-align: center; font-size: 82px; font-weight: 650; letter-spacing: -0.035em; line-height: 1.16; }
+    #ot-line span { display: inline-block; }
+    #ot-logo { position: absolute; left: 0; right: 0; top: 352px; display: flex; justify-content: center; align-items: center; gap: 36px; }
+    #ot-dot { width: 66px; height: 66px; border-radius: 50%; background: linear-gradient(135deg, #e94ba8, #f5a524); box-shadow: 0 0 70px rgba(233, 75, 168, 0.6); }
+    #ot-word { font-size: 160px; font-weight: 700; letter-spacing: -0.05em; }
+    #ot-word span { display: inline-block; }
+    #ot-stats { position: absolute; left: 0; right: 0; top: 600px; text-align: center; font-family: "Geist Mono", monospace; font-size: 36px; color: #ededf2; }
+    #ot-stats i { font-style: normal; color: #e94ba8; margin: 0 16px; }
+    #ot-credit { position: absolute; left: 0; right: 0; top: 690px; text-align: center; font-size: 28px; color: #a9a9b8; }
+  </style>
+  <div id="root" data-composition-id="outro" data-width="1920" data-height="1080">
+    <h2 id="ot-line" class="clip" data-start="0" data-duration="2.6" data-track-index="2">
+      <span>Every</span> <span>rupee</span> <span>goes</span> <span>where</span> <span>the</span><br />
+      <span class="ot-grad">next</span> <span class="ot-grad">one</span> <span>earns</span> <span>most.</span>
+    </h2>
+    <div id="ot-logo" class="clip" data-start="2.55" data-duration="2.9" data-track-index="3">
+      <div id="ot-dot"></div>
+      <div id="ot-word"><span class="ot-grad">Budget</span>&nbsp;<span class="ot-grad">Pilot</span></div>
+    </div>
+    <div id="ot-stats" class="clip" data-start="2.82" data-duration="2.63" data-track-index="4">Rs 1M<i>·</i>5 platforms<i>·</i>7 cities<i>·</i>10M rows</div>
+    <div id="ot-credit" class="clip" data-start="3.1" data-duration="2.35" data-track-index="5">Built by Usman · Big Data Analytics course</div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#ot-line span", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.16, stagger: 0.07, ease: "power4.out" }, 0.08);
+      tl.to("#ot-line span", { opacity: 0, filter: "blur(8px)", duration: 0.18, stagger: 0.012, ease: "power3.in" }, 2.36);
+      // beat-locked: wordmark lands on 43.70 abs (2.63 local)
+      tl.fromTo("#ot-dot", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.5, ease: "expo.out" }, 2.58);
+      tl.fromTo("#ot-word span", { opacity: 0, y: 10, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.3, stagger: 0.09, ease: "power3.out" }, 2.63);
+      tl.fromTo("#ot-stats", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease: "expo.out" }, 2.84);
+      tl.fromTo("#ot-credit", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 3.12);
+      window.__timelines["outro"] = tl;
+    })();
+  </script>
+</template>

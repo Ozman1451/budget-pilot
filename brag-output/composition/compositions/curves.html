@@ -1,0 +1,86 @@
+<template>
+  <style>
+    @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Geist Mono"; src: url("assets/fonts/geist-mono-latin.woff2") format("woff2"); font-weight: 100 900; }
+    #root { position: absolute; inset: 0; font-family: "Geist", sans-serif; color: #ededf2; }
+    .cv-grad { background: linear-gradient(90deg, #e94ba8, #f5a524); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #cv-title { position: absolute; left: 180px; top: 96px; font-size: 80px; font-weight: 650; letter-spacing: -0.035em; }
+    #cv-title span { display: inline-block; }
+    #cv-note { position: absolute; left: 180px; top: 206px; font-size: 42px; font-weight: 500; letter-spacing: -0.02em; color: #c9c9d4; }
+    #cv-note b { font-weight: 650; }
+    #cv-svg { position: absolute; left: 180px; top: 296px; width: 1560px; height: 640px; overflow: visible; }
+    #cv-svg text { font-family: "Geist Mono", monospace; font-size: 22px; fill: #8a8a9a; }
+    #cv-svg .cv-lab { font-family: "Geist", sans-serif; font-size: 30px; font-weight: 600; }
+    #cv-foot { position: absolute; left: 180px; top: 970px; font-family: "Geist Mono", monospace; font-size: 28px; color: #8a8a9a; }
+  </style>
+  <div id="root" data-composition-id="curves" data-width="1920" data-height="1080">
+    <h2 id="cv-title"><span>Every</span> <span>platform</span> <span class="cv-grad">flattens.</span></h2>
+    <div id="cv-note">The 300,000th rupee earns <b class="cv-grad">less</b> than the first.</div>
+    <svg id="cv-svg" viewBox="0 0 1560 640" data-layout-ignore>
+      <g id="cv-axes">
+        <line x1="90" y1="560" x2="1330" y2="560" stroke="#2c2c3a" stroke-width="2" />
+        <line x1="90" y1="20" x2="90" y2="560" stroke="#2c2c3a" stroke-width="2" />
+        <text x="90" y="600" text-anchor="middle">Rs 0</text>
+        <text id="cv-t1" text-anchor="middle" y="600">100K</text>
+        <text id="cv-t2" text-anchor="middle" y="600">200K</text>
+        <text id="cv-t3" text-anchor="middle" y="600">300K</text>
+        <text id="cv-t4" text-anchor="middle" y="600">400K</text>
+        <text x="1330" y="636" text-anchor="end">spend over 30 days →</text>
+        <text x="100" y="14">↑ predicted revenue</text>
+      </g>
+      <g id="cv-marker">
+        <line id="cv-mline" y1="560" y2="40" stroke="#ededf2" stroke-opacity="0.55" stroke-width="2" stroke-dasharray="8 10" />
+      </g>
+      <g id="cv-paths"></g>
+      <g id="cv-labels"></g>
+    </svg>
+    <div id="cv-foot">Fitted per platform on 365 days of spend → revenue · 12 months of campaign data</div>
+  </div>
+  <script>
+    (function () {
+      const BP = window.BP;
+      const COL = { Facebook: "#60A5FA", Instagram: "#E94BA8", Google: "#F5A524", TikTok: "#2DD4BF", YouTube: "#FF7A59" };
+      const NS = "http://www.w3.org/2000/svg";
+      const X0 = 90, X1 = 1330, Y0 = 560, Y1 = 30, XMAX = 450000;
+      const names = Object.keys(BP.plats);
+      const YMAX = Math.max(...names.map((n) => Math.max(...BP.plats[n].y))) * 1.06;
+      const sx = (x) => X0 + (x / XMAX) * (X1 - X0), sy = (y) => Y0 - (y / YMAX) * (Y0 - Y1);
+      [1, 2, 3, 4].forEach((i) => document.getElementById("cv-t" + i).setAttribute("x", sx(i * 100000)));
+      const m = document.getElementById("cv-mline"); m.setAttribute("x1", sx(300000)); m.setAttribute("x2", sx(300000));
+      // label positions at the curve ends, nudged apart (≥ 38 px)
+      const ends = names.map((n) => ({ n, y: sy(BP.plats[n].y.at(-1)) })).sort((a, b) => a.y - b.y);
+      for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 38) ends[i].y = ends[i - 1].y + 38;
+      const gP = document.getElementById("cv-paths"), gL = document.getElementById("cv-labels");
+      names.forEach((n, i) => {
+        const p = BP.plats[n];
+        const d = p.x.map((x, j) => (j ? "L" : "M") + sx(x).toFixed(1) + " " + sy(p.y[j]).toFixed(1)).join(" ");
+        const glow = document.createElementNS(NS, "path");
+        glow.setAttribute("d", d); glow.setAttribute("fill", "none"); glow.setAttribute("stroke", COL[n]);
+        glow.setAttribute("stroke-width", "14"); glow.setAttribute("stroke-opacity", "0.14"); glow.setAttribute("stroke-linecap", "round");
+        glow.setAttribute("pathLength", "1"); glow.setAttribute("stroke-dasharray", "1 1"); glow.setAttribute("class", "cv-glow cv-g" + i);
+        const path = document.createElementNS(NS, "path");
+        path.setAttribute("d", d); path.setAttribute("fill", "none"); path.setAttribute("stroke", COL[n]);
+        path.setAttribute("stroke-width", "5"); path.setAttribute("stroke-linecap", "round");
+        path.setAttribute("pathLength", "1"); path.setAttribute("stroke-dasharray", "1 1"); path.setAttribute("class", "cv-line cv-l" + i);
+        gP.appendChild(glow); gP.appendChild(path);
+        const t = document.createElementNS(NS, "text");
+        t.setAttribute("x", X1 + 22); t.setAttribute("y", ends.find((e) => e.n === n).y + 10);
+        t.setAttribute("class", "cv-lab cv-lb" + i); t.setAttribute("fill", COL[n]); t.textContent = n;
+        gL.appendChild(t);
+      });
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#cv-title span", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, stagger: 0.07, ease: "power4.out" }, 0.05);
+      tl.fromTo(["#cv-axes", "#cv-foot"], { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.25);
+      // curves draw from beat 5.81 abs (0.53 local) and settle on the bar line 7.39 (2.11 local)
+      names.forEach((n, i) => {
+        const s = 0.53 + i * 0.1;
+        tl.fromTo([".cv-l" + i, ".cv-g" + i], { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 2.11 - s, ease: "power2.inOut" }, s);
+        tl.fromTo(".cv-lb" + i, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, 1.75 + i * 0.05);
+      });
+      tl.fromTo("#cv-mline", { opacity: 0, scaleY: 0, transformOrigin: "50% 100%" }, { opacity: 1, scaleY: 1, duration: 0.5, ease: "expo.out" }, 2.5);
+      tl.fromTo("#cv-note", { opacity: 0, filter: "blur(8px)", y: 8 }, { opacity: 1, filter: "blur(0px)", y: 0, duration: 0.3, ease: "power4.out" }, 2.63);
+      tl.to(["#cv-title", "#cv-note", "#cv-svg", "#cv-foot"], { opacity: 0, filter: "blur(10px)", duration: 0.22, stagger: 0.012, ease: "power3.in" }, 4.92);
+      window.__timelines["curves"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,84 @@
+<template>
+  <style>
+    @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Geist Mono"; src: url("assets/fonts/geist-mono-latin.woff2") format("woff2"); font-weight: 100 900; }
+    #root { position: absolute; inset: 0; font-family: "Geist", sans-serif; color: #ededf2; }
+    .an-grad { background: linear-gradient(90deg, #e94ba8, #f5a524); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #an-head { position: absolute; left: 180px; top: 104px; font-size: 76px; font-weight: 650; letter-spacing: -0.035em; }
+    #an-head span { display: inline-block; }
+    #an-sub { position: absolute; left: 180px; top: 206px; font-family: "Geist Mono", monospace; font-size: 28px; color: #8a8a9a; }
+    .an-row { position: absolute; left: 180px; width: 960px; }
+    .an-top { display: flex; align-items: baseline; justify-content: space-between; }
+    .an-name { display: flex; align-items: center; gap: 14px; font-size: 38px; font-weight: 600; letter-spacing: -0.02em; }
+    .an-name i { width: 15px; height: 15px; border-radius: 50%; }
+    .an-pct { font-family: "Geist Mono", monospace; font-size: 36px; font-weight: 600; white-space: nowrap; }
+    .an-cur { color: #8a8a9a; }
+    .an-arr { color: #55556a; margin: 0 6px; }
+    .an-track { position: relative; margin-top: 14px; height: 16px; border-radius: 8px; background: #1b1b25; }
+    .an-ghost { position: absolute; left: 0; top: 0; height: 16px; border-radius: 8px; background: #3a3a4a; }
+    .an-bar { position: absolute; left: 0; top: 0; height: 16px; border-radius: 8px; }
+    #an-stat { position: absolute; left: 1250px; top: 330px; width: 520px; }
+    #an-up { font-family: "Geist Mono", monospace; font-size: 168px; font-weight: 600; letter-spacing: -0.06em; line-height: 1; display: inline-block; }
+    #an-up-l { font-size: 40px; font-weight: 600; letter-spacing: -0.02em; margin-top: 14px; }
+    .an-line { font-family: "Geist Mono", monospace; font-size: 28px; color: #a9a9b8; margin-top: 18px; }
+    .an-line b { color: #ededf2; font-weight: 600; }
+  </style>
+  <div id="root" data-composition-id="answer" data-width="1920" data-height="1080">
+    <h2 id="an-head"><span>Same</span> <span>Rs</span> <span>1,000,000.</span> <span class="an-grad">New</span> <span class="an-grad">split.</span></h2>
+    <div id="an-sub">grey = today's split · colour = Budget Pilot's split</div>
+    <div id="an-rows"></div>
+    <div id="an-stat">
+      <div id="an-up" class="an-grad">+0.0%</div>
+      <div id="an-up-l">more revenue, same budget</div>
+      <div class="an-line" id="an-l1">90% band <b id="an-band"></b></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const BP = window.BP, S = BP.summary;
+      const COL = { Facebook: "#60A5FA", Instagram: "#E94BA8", Google: "#F5A524", TikTok: "#2DD4BF", YouTube: "#FF7A59" };
+      const order = Object.keys(BP.plats).sort((a, b) => BP.plats[b].pct - BP.plats[a].pct);
+      const PMAX = 40, TW = 960, TOP = 300, GAP = 128;
+      const r1 = (v) => (Math.abs(v - Math.round(v)) < 0.05 ? Math.round(v) : v.toFixed(1));
+      const rowsEl = document.getElementById("an-rows");
+      const rows = order.map((n, i) => {
+        const p = BP.plats[n];
+        const r = document.createElement("div");
+        r.className = "an-row"; r.id = "an-r" + i; r.style.top = TOP + i * GAP + "px";
+        r.innerHTML = '<div class="an-top"><div class="an-name"><i style="background:' + COL[n] + '"></i>' + n + "</div>" +
+          '<div class="an-pct"><span class="an-cur">' + r1(p.cur) + '%</span><span class="an-arr an-mv">→</span><span class="an-mv" style="color:' + COL[n] + '">' + r1(p.pct) + "%</span></div></div>" +
+          '<div class="an-track"><div class="an-ghost" style="width:' + ((p.cur / PMAX) * TW).toFixed(1) + 'px"></div><div class="an-bar" style="background:' + COL[n] + '"></div></div>';
+        rowsEl.appendChild(r);
+        return { bar: r.querySelector(".an-bar"), cur: p.cur, pct: p.pct };
+      });
+      document.getElementById("an-band").textContent = "+" + S.p5.toFixed(1) + "% to +" + S.p95.toFixed(1) + "%";
+      const up = document.getElementById("an-up");
+      const eio = gsap.parseEase("power3.inOut"), eo = gsap.parseEase("power2.out");
+      const cl = (x) => Math.max(0, Math.min(1, x));
+      const MOVE = 1.05, STAT = 2.1;
+      const draw = (t) => {
+        rows.forEach((r, i) => {
+          const k = eio(cl((t - MOVE - i * 0.06) / 0.9));
+          const v = t < MOVE ? 0 : r.cur + (r.pct - r.cur) * k;
+          r.bar.style.width = ((v / PMAX) * TW).toFixed(1) + "px";
+          r.bar.style.opacity = t < MOVE ? 0 : 1;
+        });
+        up.textContent = "+" + (S.up * eo(cl((t - STAT) / 0.7))).toFixed(1) + "%";
+      };
+      const clock = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(clock, { t: 0 }, { t: 6.31, duration: 6.31, ease: "none", onUpdate: () => draw(clock.t) }, 0);
+      tl.fromTo("#an-head span", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, stagger: 0.07, ease: "power4.out" }, 0.05);
+      tl.fromTo("#an-sub", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.5);
+      rows.forEach((r, i) => tl.fromTo("#an-r" + i, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4, ease: "expo.out" }, 0.25 + i * 0.1));
+      tl.fromTo(".an-mv", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, MOVE + 0.3);
+      // bar line 27.38 abs: the uplift lands
+      tl.fromTo("#an-up", { opacity: 0, scale: 0.92, filter: "blur(12px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.35, ease: "expo.out" }, STAT - 0.02);
+      tl.fromTo("#an-up-l", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, STAT + 0.2);
+      tl.fromTo("#an-l1", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, STAT + 0.45);
+      tl.to(["#an-head", "#an-sub", ".an-row", "#an-stat"], { opacity: 0, filter: "blur(10px)", duration: 0.22, stagger: 0.008, ease: "power3.in" }, 5.98);
+      draw(0);
+      window.__timelines["answer"] = tl;
+    })();
+  </script>
+</template>

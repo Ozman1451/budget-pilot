@@ -1,0 +1,50 @@
+<template>
+  <style>
+    @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; }
+    #root { position: absolute; inset: 0; font-family: "Geist", sans-serif; color: #ededf2; }
+    .dp-label {
+      position: absolute; left: 240px; top: 66px; display: flex; align-items: center; gap: 14px;
+      font-size: 42px; font-weight: 600; letter-spacing: -0.025em; white-space: nowrap;
+    }
+    .dp-label em { font-style: normal; color: #a9a9b8; font-weight: 450; }
+    .dp-label b { width: 14px; height: 14px; border-radius: 50%; }
+    .dp-wrap {
+      position: absolute; left: 240px; top: 160px; width: 1440px; height: 810px;
+      border-radius: 20px; overflow: hidden; border: 1.5px solid #2c2c3a;
+      box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
+    }
+    .dp-wrap video { position: absolute; left: 0; top: 0; width: 1440px; height: 810px; object-fit: cover; }
+  </style>
+  <div id="root" data-composition-id="depth" data-width="1920" data-height="1080">
+    <!-- Real recordings (MOCK_CHAT=1), cropped to the controls + charts -->
+    <div id="dp-w1" class="dp-wrap"><video id="dp-v1" class="clip" data-start="0" data-duration="2.85" data-track-index="2" muted playsinline src="assets/clips/cap.mp4"></video></div>
+    <div id="dp-w2" class="dp-wrap"><video id="dp-v2" class="clip" data-start="2.5" data-duration="2.95" data-track-index="3" muted playsinline src="assets/clips/aud.mp4"></video></div>
+    <div id="dp-w3" class="dp-wrap"><video id="dp-v3" class="clip" data-start="5.13" data-duration="2.76" data-track-index="4" muted playsinline src="assets/clips/dash.mp4"></video></div>
+    <div id="dp-l1" class="dp-label"><b style="background:#2DD4BF"></b>TikTok capped at 10% <em id="dp-e1">· costs only 0.7%</em></div>
+    <div id="dp-l2" class="dp-label"><b style="background:#E94BA8"></b>Karachi · 18–24 · mobile <em id="dp-e2">· TikTok jumps to 52%</em></div>
+    <div id="dp-l3" class="dp-label"><b style="background:#F5A524"></b>Dashboard <em>· 7 cities × 5 platforms</em></div>
+  </div>
+  <script>
+    (function () {
+      // labels from the real scenario numbers (bp.js)
+      const BP = window.BP;
+      // "costs just 0.7%": optimize(max_pct={TikTok: 10}) predicts 0.74% less revenue than the uncapped plan (work/export_data.py)
+      document.getElementById("dp-e2").textContent = "· TikTok jumps to " + Math.round(BP.aud.TikTok) + "%";
+      const tl = gsap.timeline({ paused: true });
+      // cards every 5 beats: 30.54, 33.17, 35.80 abs
+      const T = [0, 2.63, 5.26];
+      T.forEach((t, i) => {
+        const w = "#dp-w" + (i + 1), l = "#dp-l" + (i + 1);
+        tl.fromTo(w, { opacity: 0, x: 160, filter: "blur(14px)" }, { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.42, ease: "expo.out" }, t);
+        tl.fromTo(l, { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, t + 0.08);
+        if (i < 2) {
+          tl.to(w, { opacity: 0, x: -110, filter: "blur(10px)", duration: 0.24, ease: "power3.in" }, T[i + 1] - 0.06);
+          tl.to(l, { opacity: 0, filter: "blur(6px)", duration: 0.14, ease: "power3.in" }, T[i + 1] - 0.08);
+        } else {
+          tl.to([w, l], { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power3.in" }, 7.64);
+        }
+      });
+      window.__timelines["depth"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,40 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #bg-glow-a, #bg-glow-b { position: absolute; border-radius: 50%; }
+    #bg-glow-a {
+      width: 1500px; height: 1100px; left: -420px; top: -520px;
+      background: radial-gradient(closest-side, rgba(233, 75, 168, 0.2), rgba(233, 75, 168, 0) 100%);
+    }
+    #bg-glow-b {
+      width: 1500px; height: 1100px; right: -460px; bottom: -560px;
+      background: radial-gradient(closest-side, rgba(245, 165, 36, 0.15), rgba(245, 165, 36, 0) 100%);
+    }
+  </style>
+  <div id="root" data-composition-id="bg" data-width="1920" data-height="1080" data-layout-ignore>
+    <div id="bg-glow-a"></div>
+    <div id="bg-glow-b"></div>
+  </div>
+  <script>
+    (function () {
+      // Audio-reactive: the magenta/saffron glow breathes with the bass of the vol-9 bed (BP_BASS, 30 fps).
+      const bass = window.BP_BASS || [];
+      const tl = gsap.timeline({ paused: true });
+      const D = 48.1, STEP = 1 / 6;
+      const at = (t) => {
+        const f = Math.round(t * 30);
+        let s = 0, n = 0;
+        for (let i = f - 3; i <= f + 3; i++) { if (bass[i] != null) { s += bass[i]; n++; } }
+        return n ? s / n : 0;
+      };
+      tl.set("#bg-glow-a", { opacity: 0.75, scale: 1 }, 0);
+      tl.set("#bg-glow-b", { opacity: 0.75, scale: 1 }, 0);
+      for (let t = 0; t < D - STEP; t += STEP) {
+        const e = at(t + STEP);
+        tl.to("#bg-glow-a", { opacity: 0.68 + e * 0.32, scale: 1 + e * 0.04, duration: STEP, ease: "none" }, t);
+        tl.to("#bg-glow-b", { opacity: 0.62 + e * 0.36, scale: 1 + e * 0.035, duration: STEP, ease: "none" }, t);
+      }
+      window.__timelines["bg"] = tl;
+    })();
+  </script>
+</template>

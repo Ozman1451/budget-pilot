@@ -8,18 +8,13 @@
 
 ## ▶️ Launch video (48 s)
 
-<!--
-  BRAG VIDEO SLOT: inline player via a GitHub issue upload.
-  1. Open an issue in this repo (or any comment box), drag brag-output/brag.mp4 into it and wait for the upload.
-  2. Copy the generated link: https://github.com/user-attachments/assets/<id>
-  3. Replace the placeholder URL below with it, keeping it on its own line with blank lines around it.
-     GitHub then renders an inline video player (the poster frame brag.jpg is already baked into frame 0).
-  4. Delete the "coming soon" line.
--->
+<p align="center">
+  <a href="docs/media/brag.mp4"><img src="docs/media/brag.jpg" alt="Budget Pilot launch video (48 s): same Rs 1,000,000, new split, +11.4% more revenue. Click to play." width="100%"></a>
+</p>
 
-https://github.com/user-attachments/assets/REPLACE-WITH-BRAG-VIDEO-ID
+> ▶️ **Launch video (48 s):** one Rs 1,000,000 budget, five platforms, the curves that flatten, and the optimizer moving money until every platform's next rupee earns 2.42×. [docs/media/brag.mp4](docs/media/brag.mp4)
 
-> 🎬 *Launch video coming soon:* one Rs 1,000,000 budget, five platforms, the curves that flatten, and the optimizer moving money until every platform's next rupee earns 2.42×.
+https://github.com/user-attachments/assets/4fa7675d-a833-41ad-bd45-3c2b6072d149
 
 Built for the Big Data Analytics course. The chat runs on Gemini function calling, but **every number comes from Python tools** over 12 months of campaign data (5 platforms · 7 cities · 40 campaigns). The same KPI job is benchmarked in **Pandas, MapReduce and PySpark up to 10,000,000 rows**, with identical results.
 

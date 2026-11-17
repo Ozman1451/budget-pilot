@@ -15,14 +15,7 @@
 ## 2. What needs you
 
 1. ~~Full benchmark (1M + 10M)~~: **done.** All 20 runs passed and every engine agrees; the README table and the Lab page are updated.
-2. **Review the launch video** in `brag-output/`: `brag.mp4` (48 s), `brag.jpg` (poster), `brag-plan.md`, `share-copy.txt`. When you're happy:
-   - Drag `brag-output/brag.mp4` into a GitHub issue comment, copy the `https://github.com/user-attachments/assets/…` link, and paste it over the placeholder line under "▶️ Launch video" in `README.md`. Delete the "coming soon" line.
-   - Push it:
-     ```bash
-     cd ~/projects/budget-pilot
-     git add brag-output README.md && git commit -m "Add launch video" && git push
-     ```
-     (`brag-output/work/`, the raw frames and caches, is git-ignored.)
+2. ~~Launch video~~: **done.** It plays inline in the README (GitHub attachment). The file is in `docs/media/brag.mp4` (5 MB); the plan, share copy and HyperFrames source are in `brag-output/`.
 3. **Look at the app:**
    ```bash
    make app                         # open http://localhost:3000  (Ctrl-C stops both servers)

@@ -1,0 +1,92 @@
+<template>
+  <style>
+    @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Geist Mono"; src: url("assets/fonts/geist-mono-latin.woff2") format("woff2"); font-weight: 100 900; }
+    #root { position: absolute; inset: 0; font-family: "Geist", sans-serif; color: #ededf2; }
+    .md-grad { background: linear-gradient(90deg, #e94ba8, #f5a524); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #md-ask { position: absolute; left: 180px; top: 92px; font-size: 36px; font-weight: 500; color: #a9a9b8; letter-spacing: -0.015em; }
+    #md-q { position: absolute; left: 180px; top: 142px; font-size: 76px; font-weight: 650; letter-spacing: -0.035em; }
+    #md-q span { display: inline-block; }
+    .md-cap { position: absolute; left: 180px; top: 300px; font-family: "Geist Mono", monospace; font-size: 28px; letter-spacing: 0.02em; }
+    #md-cap1 { color: #8a8a9a; }
+    #md-cap2 { color: #ededf2; }
+    #md-cap2 i { font-style: normal; color: #f5a524; }
+    .md-row { position: absolute; left: 180px; width: 1560px; height: 70px; display: flex; align-items: center; }
+    .md-name { width: 300px; flex: none; display: flex; align-items: center; gap: 16px; font-size: 40px; font-weight: 600; letter-spacing: -0.02em; position: relative; }
+    .md-name i { width: 16px; height: 16px; border-radius: 50%; flex: none; }
+    .md-tag { position: absolute; left: 32px; top: 48px; font-family: "Geist Mono", monospace; font-size: 20px; color: #8a8a9a; white-space: nowrap; }
+    .md-track { position: relative; width: 1040px; height: 20px; border-radius: 10px; background: #1b1b25; flex: none; }
+    .md-bar { position: absolute; left: 0; top: 0; height: 20px; border-radius: 10px; }
+    .md-val { width: 220px; flex: none; text-align: right; font-family: "Geist Mono", monospace; font-size: 46px; font-weight: 600; }
+    #md-line { position: absolute; top: 368px; width: 4px; height: 500px; margin-left: -2px; border-radius: 2px;
+      background: linear-gradient(180deg, #e94ba8, #f5a524); box-shadow: 0 0 24px rgba(233, 75, 168, 0.6); }
+    #md-eq { position: absolute; top: 880px; font-size: 40px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; transform: translateX(-50%); }
+    #md-eq b { font-family: "Geist Mono", monospace; font-size: 54px; }
+    #md-formula { position: absolute; left: 180px; top: 980px; font-family: "Geist Mono", monospace; font-size: 28px; color: #8a8a9a; }
+    #md-formula em { font-style: normal; color: #c9c9d4; }
+  </style>
+  <div id="root" data-composition-id="method" data-width="1920" data-height="1080">
+    <div id="md-ask">So Budget Pilot asks one question:</div>
+    <h2 id="md-q"><span>Where</span> <span>does</span> <span>the</span> <span class="md-grad">next</span> <span class="md-grad">rupee</span> <span>earn</span> <span>most?</span></h2>
+    <div id="md-cap1" class="md-cap">Return on the next rupee · at today's split</div>
+    <div id="md-cap2" class="md-cap">Move money until they're <i>equal</i> → within 5–60% caps per platform</div>
+    <div id="md-rows"></div>
+    <div id="md-line"></div>
+    <div id="md-eq"><b class="md-grad">2.42×</b> everywhere</div>
+    <div id="md-formula"><em>revenue = a·log(1 + spend/b)</em> · next rupee = a/(b + spend)</div>
+  </div>
+  <script>
+    (function () {
+      const BP = window.BP;
+      const COL = { Facebook: "#60A5FA", Instagram: "#E94BA8", Google: "#F5A524", TikTok: "#2DD4BF", YouTube: "#FF7A59" };
+      const order = Object.keys(BP.plats).sort((a, b) => BP.plats[b].m_now - BP.plats[a].m_now);
+      const VMAX = 4.0, TW = 1040, TRACK_X = 180 + 300;
+      const rowsEl = document.getElementById("md-rows");
+      const TOP = 372, GAP = 98;
+      const rows = order.map((n, i) => {
+        const p = BP.plats[n];
+        const r = document.createElement("div");
+        r.className = "md-row"; r.id = "md-r" + i; r.style.top = TOP + i * GAP + "px";
+                r.innerHTML = '<div class="md-name"><i style="background:' + COL[n] + '"></i>' + n +
+          "</div>" +
+          '<div class="md-track"><div class="md-bar" style="background:' + COL[n] + '"></div></div><div class="md-val" style="color:' + COL[n] + '">0.00×</div>';
+        rowsEl.appendChild(r);
+        return { el: r, bar: r.querySelector(".md-bar"), val: r.querySelector(".md-val"), now: p.m_now, rec: p.m_rec };
+      });
+      const eqV = BP.plats[order[0]].m_rec; // the common marginal ROAS (2.42×)
+      const lineX = TRACK_X + (eqV / VMAX) * TW;
+      document.getElementById("md-line").style.left = lineX + "px";
+      document.getElementById("md-eq").style.left = lineX + "px";
+      document.querySelector("#md-eq b").textContent = eqV.toFixed(2) + "×";
+      const eo = gsap.parseEase("power3.out"), eio = gsap.parseEase("power3.inOut");
+      const cl = (x) => Math.max(0, Math.min(1, x));
+      const ROW0 = 2.11, MOVE = 4.21, MOVED = 1.45;
+      const draw = (t) => {
+        rows.forEach((r, i) => {
+          const g = eo(cl((t - (ROW0 + i * 0.263)) / 0.6));
+          const mv = eio(cl((t - MOVE - i * 0.05) / MOVED));
+          const v = (r.now + (r.rec - r.now) * mv) * g;
+          r.bar.style.width = ((v / VMAX) * TW).toFixed(1) + "px";
+          r.val.textContent = v.toFixed(2) + "×";
+        });
+      };
+      const clock = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(clock, { t: 0 }, { t: 8.42, duration: 8.42, ease: "none", onUpdate: () => draw(clock.t) }, 0);
+      tl.fromTo("#md-ask", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.25, ease: "power3.out" }, 0.05);
+      tl.fromTo("#md-q span", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, stagger: 0.075, ease: "power4.out" }, 0.35);
+      tl.fromTo("#md-cap1", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 1.85);
+      rows.forEach((r, i) => tl.fromTo("#md-r" + i, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4, ease: "expo.out" }, ROW0 + i * 0.263 - 0.03));
+      // bar line 14.75 abs: caption swaps, bars glide to equal
+      tl.to("#md-cap1", { opacity: 0, duration: 0.15, ease: "power2.in" }, MOVE - 0.15);
+      tl.fromTo("#md-cap2", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.25, ease: "power3.out" }, MOVE);
+      // bar line 16.86 abs: the equal line + label
+      tl.fromTo("#md-line", { opacity: 0, scaleY: 0, transformOrigin: "50% 0%" }, { opacity: 1, scaleY: 1, duration: 0.45, ease: "expo.out" }, 6.32);
+      tl.fromTo("#md-eq", { opacity: 0, y: 12, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.3, ease: "expo.out" }, 6.36);
+      tl.fromTo("#md-formula", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 4.35);
+      tl.to(["#md-ask", "#md-q", "#md-cap2", ".md-row", "#md-line", "#md-eq", "#md-formula"], { opacity: 0, filter: "blur(10px)", duration: 0.22, stagger: 0.008, ease: "power3.in" }, 8.08);
+      draw(0);
+      window.__timelines["method"] = tl;
+    })();
+  </script>
+</template>

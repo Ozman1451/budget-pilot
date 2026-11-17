@@ -1,0 +1,68 @@
+<template>
+  <style>
+    @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Geist Mono"; src: url("assets/fonts/geist-mono-latin.woff2") format("woff2"); font-weight: 100 900; }
+    #root { position: absolute; inset: 0; font-family: "Geist", sans-serif; color: #ededf2; }
+    .sc-grad { background: linear-gradient(90deg, #e94ba8, #f5a524); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    #sc-head { position: absolute; left: 180px; top: 110px; font-size: 70px; font-weight: 650; letter-spacing: -0.035em; white-space: nowrap; }
+    #sc-head span { display: inline-block; }
+    #sc-n { font-family: "Geist Mono", monospace; font-weight: 600; letter-spacing: -0.04em; }
+    #sc-sub { position: absolute; left: 180px; top: 214px; font-family: "Geist Mono", monospace; font-size: 28px; color: #8a8a9a; }
+    .sc-row { position: absolute; left: 180px; width: 1560px; height: 64px; display: flex; align-items: center; }
+    .sc-name { width: 380px; flex: none; font-size: 36px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; }
+    .sc-name em { font-style: normal; color: #8a8a9a; font-weight: 450; }
+    .sc-bar { height: 22px; border-radius: 11px; flex: none; }
+    .sc-val { margin-left: 20px; font-family: "Geist Mono", monospace; font-size: 34px; font-weight: 600; white-space: nowrap; }
+    #sc-foot { position: absolute; left: 180px; top: 900px; font-size: 38px; font-weight: 600; letter-spacing: -0.02em; display: flex; align-items: center; gap: 18px; }
+    #sc-foot i { font-style: normal; width: 46px; height: 46px; border-radius: 50%; background: rgba(52, 211, 153, 0.15); color: #34d399; display: grid; place-items: center; font-size: 30px; }
+  </style>
+  <div id="root" data-composition-id="scale" data-width="1920" data-height="1080">
+    <h2 id="sc-head"><span>Benchmarked</span> <span>up</span> <span>to</span> <span id="sc-n" class="sc-grad">10,000,000</span> <span>rows</span></h2>
+    <div id="sc-sub">Same KPI job, three engines · wall time per run (median of 3)</div>
+    <div id="sc-rows"></div>
+    <div id="sc-foot"><i>✓</i>Identical KPIs, every engine</div>
+  </div>
+  <script>
+    (function () {
+      const B = window.BP.bench;
+      const ROWS = [
+        ["pandas_parquet", "Pandas", "Parquet", "#4CC9F0"],
+        ["pandas", "Pandas", "CSV", "#4CC9F0"],
+        ["spark_parquet", "PySpark", "Parquet", "#F5A524"],
+        ["spark", "PySpark", "CSV", "#F5A524"],
+        ["mapreduce", "MapReduce", "mrjob", "#A78BFA"],
+      ];
+      const SMAX = Math.max(...ROWS.map((r) => B[r[0]].s)), BW = 1000, TOP = 300, GAP = 104;
+      const rowsEl = document.getElementById("sc-rows");
+      const rows = ROWS.map(([k, name, fmt, c], i) => {
+        const el = document.createElement("div");
+        el.className = "sc-row"; el.id = "sc-r" + i; el.style.top = TOP + i * GAP + "px";
+        el.innerHTML = '<div class="sc-name">' + name + " <em>· " + fmt + '</em></div><div class="sc-bar" style="background:' + c + '"></div><div class="sc-val" style="color:' + c + '"></div>';
+        rowsEl.appendChild(el);
+        return { bar: el.querySelector(".sc-bar"), val: el.querySelector(".sc-val"), s: B[k].s };
+      });
+      const n = document.getElementById("sc-n");
+      const eo = gsap.parseEase("power3.out");
+      const cl = (x) => Math.max(0, Math.min(1, x));
+      const R0 = 1.05;
+      const draw = (t) => {
+        n.textContent = Math.round((10000000 * eo(cl((t - 0.1) / 0.95))) / 10000 * 10000).toLocaleString("en-US");
+        rows.forEach((r, i) => {
+          const k = eo(cl((t - (R0 + i * 0.263)) / 0.55));
+          r.bar.style.width = Math.max(6, (r.s / SMAX) * BW * k).toFixed(1) + "px";
+          r.val.textContent = (r.s * k).toFixed(1) + " s";
+        });
+      };
+      const clock = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(clock, { t: 0 }, { t: 4.21, duration: 4.21, ease: "none", onUpdate: () => draw(clock.t) }, 0);
+      tl.fromTo("#sc-head span", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, stagger: 0.06, ease: "power4.out" }, 0.03);
+      tl.fromTo("#sc-sub", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.6);
+      rows.forEach((r, i) => tl.fromTo("#sc-r" + i, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.35, ease: "expo.out" }, R0 + i * 0.263 - 0.03));
+      tl.fromTo("#sc-foot", { opacity: 0, y: 10, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.3, ease: "expo.out" }, 1.95);
+      tl.to(["#sc-head", "#sc-sub", ".sc-row", "#sc-foot"], { opacity: 0, filter: "blur(10px)", duration: 0.2, stagger: 0.008, ease: "power3.in" }, 3.92);
+      draw(0);
+      window.__timelines["scale"] = tl;
+    })();
+  </script>
+</template>
