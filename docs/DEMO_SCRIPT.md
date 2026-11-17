@@ -22,20 +22,26 @@ make app                       # wait for "Ready" from Next.js; open http://loca
 | 1:25–1:40 | Type **"Why is Google better than YouTube?"** | "Google's clicks are expensive but high-intent; YouTube is cheap reach that rarely converts. Its first-rupee ROAS is below everyone else's marginal ROAS." |
 | 1:40–2:05 | **Dashboard** tab. Change *All cities* → **Karachi**, then clear. Hover the heatmap. | "The dashboard: 12 months, KPI cards, platform comparison, ROAS trend, city-by-platform heatmap and the funnel. Every filter recomputes from the raw rows." |
 | 2:05–2:35 | **Optimizer** tab. Drag **TikTok max** to 10%, then **YouTube min** to 15%. Point at the donut animating and the ● markers moving on the curves. | "Here management can play: budget, min and max per platform. Each curve flattens; the dot is where we stop spending, at the point where the extra rupee stops paying." |
-| 2:35–3:00 | **Big Data Lab** tab. Point at the log-scale chart and the "when to use which" card. | "Big Data part: the same aggregation in Pandas, MapReduce and Spark, all real measurements, and all three produce identical KPIs. At this size Pandas wins and Spark's JVM start-up dominates; at 10 million rows the picture changes. That's when to reach for Spark." |
+| 2:35–3:00 | **Big Data Lab** tab. Point at the log-scale chart and the "when to use which" card. | "Big Data part: the same aggregation in Pandas, MapReduce and Spark, all real measurements, and all three produce identical KPIs. Look at the curve shapes: from 10 thousand to 10 million rows Spark on Parquet only goes from 22 to 26 seconds, because most of its time is a fixed JVM start-up, while MapReduce grows twenty-fold. Parquet makes Pandas three times faster at 10 million. On one machine Pandas wins; once the data outgrows RAM or moves to a cluster, Spark's flat cost is why you reach for it." |
 
 Fallback if Gemini is rate-limited: set `MOCK_CHAT=1` in `.env`, restart `make app`. The offline router calls the same tools, so the charts are identical; only the prose is simpler.
 
-## 45-second "brag video" shot list
+## Launch ("brag") video
 
-| # | Duration | Shot | On-screen text / VO |
-|---|---|---|---|
-| 1 | 0–4s | Black → Budget Pilot logo dot glowing, title types in | "Where should the next Rs. 1,000,000 go?" |
-| 2 | 4–10s | Chat: chip clicked, tool trace ticks green, donut spins in | "Ask in plain words." |
-| 3 | 10–16s | Close-up of the reasons table + "+11% vs current mix · 90% band" | "Every number from Python, not the LLM." |
-| 4 | 16–23s | Optimizer: drag the TikTok max slider; donut and curve dots animate | "Diminishing returns, fitted per platform." |
-| 5 | 23–29s | Dashboard: scroll from KPI cards to the heatmap | "12 months · 5 platforms · 7 cities." |
-| 6 | 29–37s | Big Data Lab: log-scale chart draws in; highlight "KPIs identical: yes" | "Pandas vs MapReduce vs Spark: real benchmarks." |
-| 7 | 37–45s | Back to chat with the full answer; logo + "Budget Pilot · FastAPI · Gemini · PySpark · Next.js" | "Budget Pilot." |
+The finished 48-second launch video lives in `brag-output/`:
 
-Screenshots for thumbnails are in `docs/screens/` (`make shots` regenerates them).
+- `brag.mp4`: 1920×1080, 30 fps, −16 LUFS, poster baked into frame 0
+- `brag.jpg`: the poster (the +11.4% answer frame)
+- `brag-plan.md`: angle, storyboard and audio cues
+- `share-copy.txt`: a caption ready to post
+- `composition/`: the HyperFrames source
+
+App footage in it was recorded with `MOCK_CHAT=1` (no Gemini calls) by `brag-output/work/record.mjs`. To re-render after an edit:
+
+```bash
+cd brag-output/composition && npx --yes hyperframes@0.9.55 render -o ../work/render.mp4
+```
+
+To put it in the README as an inline player, drag `brag.mp4` into a GitHub issue comment, copy the `https://github.com/user-attachments/assets/…` link, and paste it over the placeholder line in the README's "Launch video" section.
+
+Screenshots for thumbnails are in `docs/screens/` (`make shots` regenerates them); the README banner is `docs/media/banner.png` (`node brag-output/work/banner.mjs`).

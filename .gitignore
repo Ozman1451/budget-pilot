@@ -14,3 +14,8 @@ data/ads_10m.*
 data/*.tmp
 bench/tmp/
 .DS_Store
+# brag video: raw recordings, frames and render caches stay local (deliverables in brag-output/ are kept)
+brag-output/work/
+brag-output/composition/.hyperframes/
+brag-output/composition/renders/
+brag-output/composition/node_modules/

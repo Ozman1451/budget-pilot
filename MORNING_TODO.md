@@ -6,31 +6,32 @@
 - **Data:** `data/generate.py` is vectorised and chunked to Parquet, with realistic per-platform CTR/CVR/CPC, audience skew, seasonality and diminishing returns. I generated **10K (+CSV) and 100K** rows.
 - **KPI engine:** `engine/kpis.py` covers CTR, CPC, CPM, CPA, CVR, ROAS, profit and AOV, using safe division.
 - **Optimizer:** `engine/optimizer.py` fits `a·log(1+s/b)` per platform with curve_fit, allocates by equal marginal ROAS within min/max caps, supports audience filters, and gives a 100× bootstrap band, uplift vs current and equal split, and a reason per platform. For Rs 1M it recommends Instagram 35%, Google 34%, TikTok 20.5%, Facebook 5.5% and YouTube 5%, with **+11.4% revenue vs the current mix** (90% band +9.4% to +14.6%).
-- **Benchmark:** Pandas, MapReduce (mrjob local) and PySpark (local[*]) all ran at **10K and 100K, 3 runs each**, with real numbers in `bench/results.csv` and the README table. **All engines produced identical KPIs.** Spark works.
+- **Benchmark:** Pandas, MapReduce (mrjob local) and PySpark (local[*]) ran at **10K, 100K, 1M and 10M rows, 3 runs each** (CSV + Parquet), with real numbers in `bench/results.csv` and the README table. **All engines produced identical KPIs at every size.** At 10M: Pandas+Parquet 2.1s, Spark+Parquet 26.0s, MapReduce 135.5s.
 - **App:** FastAPI + Next.js with the same dark theme as Need Map Chat, and four pages: Chat (Gemini function calling with 4 tools and inline charts), Dashboard, Optimizer and Big Data Lab.
 - **Gemini:** your `.env` key works. It was smoke-tested with about 6 calls, and the answers quoted only tool numbers.
 - **Tests:** 25 pytest tests pass (KPI formulas, optimizer respects caps and sums to the budget, engines agree, API, mock chat). `eslint` and `next build` are clean. All pages returned HTTP 200 with no page errors, and the servers are stopped.
-- **Docs:** `README.md`, `docs/DEMO_SCRIPT.md`, `docs/DECISIONS.md` (31 choices I made), `docs/REUSED.md` and screenshots in `docs/screens/`.
+- **Docs:** `README.md`, `docs/DEMO_SCRIPT.md`, `docs/DECISIONS.md` (31 choices I made), `docs/REUSED.md` and screenshots in `docs/screens/`. · README banner `docs/media/banner.png` · launch video in `brag-output/` (48 s, footage recorded with MOCK_CHAT=1).
 
 ## 2. What needs you
 
-1. **Run the full benchmark** (1M + 10M rows; generates the data first; probably 15–40 min):
-   ```bash
-   cd ~/projects/budget-pilot
-   make bench                       # all sizes; or: make bench MAX_ROWS=1000000 to skip 10M
-   ```
-   This updates `bench/results.csv` and the README table automatically. If 10M is too heavy for your laptop, use `MAX_ROWS=1000000`. Big sizes are recorded as `timeout` after 600s per run, never invented; raise it with `conda run -n budget-pilot python bench/run_all.py --timeout 1200`.
-2. **Look at the app:**
+1. ~~Full benchmark (1M + 10M)~~: **done.** All 20 runs passed and every engine agrees; the README table and the Lab page are updated.
+2. **Review the launch video** in `brag-output/`: `brag.mp4` (48 s), `brag.jpg` (poster), `brag-plan.md`, `share-copy.txt`. When you're happy:
+   - Drag `brag-output/brag.mp4` into a GitHub issue comment, copy the `https://github.com/user-attachments/assets/…` link, and paste it over the placeholder line under "▶️ Launch video" in `README.md`. Delete the "coming soon" line.
+   - Push it:
+     ```bash
+     cd ~/projects/budget-pilot
+     git add brag-output README.md && git commit -m "Add launch video" && git push
+     ```
+     (`brag-output/work/`, the raw frames and caches, is git-ignored.)
+3. **Look at the app:**
    ```bash
    make app                         # open http://localhost:3000  (Ctrl-C stops both servers)
    ```
-3. **Record the demo** using `docs/DEMO_SCRIPT.md` (see section 5).
-4. *(Optional)* After `make bench`, refresh the screenshots so the Lab page shows 1M/10M: `make shots` (uses system Chrome; makes 2–3 Gemini calls for the chat shot, or run `SHOT_CHAT=0 make shots`).
-5. *(Optional)* Your `.env` was copied from Project 3 and still contains unused keys (`APIFY_TOKEN`, `DATASET`, …). They are harmless; I didn't edit it. `.env.example` lists what Budget Pilot uses.
+4. *(Optional)* Make the repo public: `gh repo edit Ozman1451/budget-pilot --visibility public --accept-visibility-change-consequences`
+5. *(Optional)* Your `.env` still has unused Project 3 keys (`APIFY_TOKEN`, `DATASET`, …). They're harmless; I didn't edit it.
 
 ## 3. Known issues and limits
 
-- **Not run:** 1M/10M generation and benchmarks, as instructed. I measured the generator at 100K in 0.3s and streams chunks of 500K rows, so 10M should take under a minute and stay bounded in RAM. That is not tested yet.
 - **Spark at small sizes** takes about 22s, of which about 12s is JVM start-up. That is real and explained on the Lab page, not a bug.
 - The Optimizer and `optimize_budget` take about **3s** on first call (100 bootstrap refits). After that they are cached per argument set. Sliders are debounced.
 - The donut's outside label for Instagram is clipped on narrower cards; the legend and tooltip show it.
